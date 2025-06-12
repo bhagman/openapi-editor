@@ -13,14 +13,27 @@ A user-friendly web-based editor for creating and editing OpenAPI 3.1.1 specific
 
 ## Getting Started
 
-Because this app loads JavaScript modules, you must use a local web server to run it. You cannot simply open `index.html` directly in your browser.
+You can always check out the [live demo](https://bhagman.github.io/openapi-editor/) to see the editor in action. The app runs in your browser only, and stores the current OpenAPI specification in your browser's local storage, so you can continue editing later. Nothing is sent to any server.
+
+If you want to run the editor locally, follow these steps:
+
+1. **Clone the Repository**: Clone this repository to your local machine
+   ```bash
+   git clone https://github.com/bhagman/openapi-editor.git
+   ```
+2. **Navigate to the Directory**: Change into the cloned directory
+   ```bash
+   cd openapi-editor
+   ```
+3. **Start a Local Web Server**: Because this app loads JavaScript modules, you must use a local web server to run it. You cannot simply open `index.html` directly in your browser.
 
 ### Quick Start with Python
 
 If you have Python installed, you can start a local server with:
 
 ```bash
-python -m http.server
+cd openapi-editor
+python -m http.server 8000
 ```
 
 Then open [http://localhost:8000](http://localhost:8000) in your browser.
@@ -84,6 +97,8 @@ There are likely lots of bits missing from the OpenAPI spec, but this editor pro
 ## Contributing
 
 Feel free to submit issues and enhancement requests!
+
+[OpenAPI Editor Issues](https://github.com/bhagman/openapi-editor/issues)
 
 ## License
 

@@ -1,0 +1,12 @@
+<svg class="w-20 h-20 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer document-like shape with rounded corners -->
+    <rect x="3" y="3" width="18" height="18" rx="3" ry="3" stroke-width="2"></rect>
+
+    <!-- Curly brace (representing JSON/YAML structure) -->
+    <path d="M8 8 C6 8, 6 10, 8 12 S6 16, 8 16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    <path d="M16 8 C18 8, 18 10, 16 12 S18 16, 16 16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+
+    <!-- Small dot or dash inside, can represent a cursor or specific data point -->
+    <circle cx="12" cy="12" r="1" fill="currentColor"></circle>
+</svg>
