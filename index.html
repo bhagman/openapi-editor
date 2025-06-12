@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAPI Editor</title> <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="src/styles/main.css">
+</head>
+
+<body>
+    <div id="app">
+        <header class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+            <div class="container-fluid px-4">
+                <h1 class="navbar-brand mb-0 h1 text-primary fw-bold">OpenAPI 3.1.1 Editor</h1>
+                <div class="d-flex align-items-center gap-3">
+                    <div id="auto-save-indicator" class="text-success small d-none">
+                        <i class="fas fa-check-circle"></i> Auto-saved
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="theme-selector">
+                            <label for="theme-select" class="form-label text-muted small mb-0 me-2">Theme:</label>
+                            <select id="theme-select" class="form-select form-select-sm" style="width: auto;">
+                                <option value="system">System</option>
+                                <option value="light">Light</option>
+                                <option value="dark">Dark</option>
+                            </select>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button id="clear-data-btn" class="btn btn-danger">Clear Saved Data</button>
+                            <button id="import-btn" class="btn btn-primary">Import JSON</button>
+                            <button id="export-btn" class="btn btn-primary">Export JSON</button>
+                            <button id="copy-json-btn" class="btn btn-outline-primary">Copy to Clipboard</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="container-fluid h-100">
+            <div class="row h-100">
+                <div class="col-lg-4 col-xl-3 bg-white border-end p-0">
+                    <div class="sidebar p-4 h-100 overflow-auto">
+                        <div class="section mb-4">
+                            <h3 class="h5 fw-bold text-secondary mb-3">API Information</h3>
+                            <div class="mb-3">
+                                <label for="api-title" class="form-label">Title</label>
+                                <input type="text" id="api-title" class="form-control" placeholder="My API" value="My API">
+                            </div>
+                            <div class="mb-3">
+                                <label for="api-version" class="form-label">Version</label>
+                                <input type="text" id="api-version" class="form-control" placeholder="1.0.0" value="1.0.0">
+                            </div>
+                            <div class="mb-3">
+                                <label for="api-description" class="form-label">Description</label>
+                                <textarea id="api-description" class="form-control" rows="3" placeholder="API description"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="api-base-url" class="form-label">Base URL</label>
+                                <input type="text" id="api-base-url" class="form-control" placeholder="https://api.example.com" value="https://api.example.com">
+                            </div>
+                        </div>
+                        <div class="section mb-4 d-flex align-items-center justify-content-between">
+                            <h3 class="h5 fw-bold text-secondary mb-3 mb-0">Endpoints</h3>
+                            <button id="add-endpoint-btn" class="btn btn-sm btn-primary ms-2">Add Endpoint</button>
+                        </div>
+                        <div id="endpoints-list" class="endpoints-list"></div>
+                        <div class="section mb-4 d-flex align-items-center justify-content-between">
+                            <h3 class="h5 fw-bold text-secondary mb-3 mb-0">Tags</h3>
+                            <button id="add-tag-btn" class="btn btn-sm btn-primary ms-2">Add Tag</button>
+                        </div>
+                        <div id="tags-list" class="tags-list"></div>
+                        <div class="section mb-4 d-flex align-items-center justify-content-between">
+                            <h3 class="h5 fw-bold text-secondary mb-3 mb-0">Security Schemes</h3>
+                            <button id="add-security-btn" class="btn btn-sm btn-primary ms-2">Add Security</button>
+                        </div>
+                        <div id="security-schemes-list" class="security-schemes-list"></div>
+                        <div class="section mb-4 d-flex align-items-center justify-content-between">
+                            <h3 class="h5 fw-bold text-secondary mb-3 mb-0">Schemas</h3>
+                            <button id="add-schema-btn" class="btn btn-sm btn-primary ms-2">Add Schema</button>
+                        </div>
+                        <div id="schemas-list" class="schemas-list"></div>
+                    </div> <!-- End sidebar -->
+                </div>
+                <div class="col-lg-8 col-xl-9 p-0">
+                    <div class="main-content p-4 h-100 overflow-auto">
+                        <div id="endpoint-editor" class="endpoint-editor" style="display: none;">
+                            <h2 class="h4 fw-bold mb-4">Edit Endpoint</h2>
+
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="endpoint-method" class="form-label">Method</label>
+                                    <select id="endpoint-method" class="form-select">
+                                        <option value="get">GET</option>
+                                        <option value="post">POST</option>
+                                        <option value="put">PUT</option>
+                                        <option value="patch">PATCH</option>
+                                        <option value="delete">DELETE</option>
+                                        <option value="head">HEAD</option>
+                                        <option value="options">OPTIONS</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="endpoint-path" class="form-label">Path</label>
+                                    <input type="text" id="endpoint-path" class="form-control" placeholder="/users/{id}">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="endpoint-summary" class="form-label">Summary</label>
+                                <input type="text" id="endpoint-summary" class="form-control" placeholder="Get user by ID">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="endpoint-description" class="form-label">Description</label>
+                                <textarea id="endpoint-description" class="form-control" rows="3" placeholder="Detailed endpoint description"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="endpoint-tags" class="form-label">Tags</label>
+                                <div class="tags-input-container">
+                                    <select id="endpoint-tags-select" class="form-select" multiple>
+                                        <!-- Options will be populated dynamically -->
+                                    </select>
+                                    <small class="form-text text-muted">Select tags to group this endpoint. Hold Ctrl/Cmd to select multiple tags.</small>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <ul class="nav nav-tabs" id="endpoint-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" data-tab="parameters">Parameters</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" data-tab="request-body">Request Body</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" data-tab="responses">Responses</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" data-tab="security">Security</button>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content mt-3">
+                                    <div id="parameters-tab" class="tab-pane active">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h3 class="h5 fw-bold">Parameters</h3>
+                                            <button id="add-parameter-btn" class="btn btn-sm btn-outline-secondary">Add Parameter</button>
+                                        </div>
+                                        <div id="parameters-list"></div>
+                                    </div>
+
+                                    <div id="request-body-tab" class="tab-pane">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h3 class="h5 fw-bold">Request Body</h3>
+                                            <div class="form-check">
+                                                <input type="checkbox" id="has-request-body" class="form-check-input">
+                                                <label class="form-check-label" for="has-request-body">This endpoint accepts a request body</label>
+                                            </div>
+                                        </div>
+                                        <div id="request-body-form" style="display: none;">
+                                            <div class="request-body-content-types">
+                                                <div class="section-header">
+                                                    <h4>Content Types</h4>
+                                                    <button type="button" class="btn btn-small btn-secondary" onclick="window.uiManager.addRequestBodyContentType()">Add Content Type</button>
+                                                </div>
+                                                <div id="request-body-content-types-list"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="responses-tab" class="tab-pane">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h3 class="h5 fw-bold">Responses</h3>
+                                            <button id="add-response-btn" class="btn btn-sm btn-outline-secondary">Add Response</button>
+                                        </div>
+                                        <div id="responses-list"></div>
+                                    </div>
+
+                                    <div id="security-tab" class="tab-pane">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h3 class="h5 fw-bold">Security Requirements</h3>
+                                            <div class="form-check">
+                                                <input type="checkbox" id="security-requirements-toggle" class="form-check-input">
+                                                <label class="form-check-label" for="security-requirements-toggle">This endpoint requires authentication</label>
+                                            </div>
+                                        </div>
+                                        <div id="security-requirements-container" style="display: none;">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <p class="text-muted mb-0">Define which security schemes are required for this endpoint.</p>
+                                                <button id="add-security-requirement-btn" class="btn btn-sm btn-outline-secondary">Add Requirement</button>
+                                            </div>
+                                            <div id="security-requirements-list"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                                    <button id="save-endpoint-btn" class="btn btn-primary">Save Endpoint</button>
+                                    <button id="delete-endpoint-btn" class="btn btn-danger">Delete Endpoint</button>
+                                    <button id="cancel-edit-btn" class="btn btn-secondary">Cancel</button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div id="welcome-screen" class="welcome-screen text-center py-5">
+                            <h2 class="h3 fw-bold text-primary mb-3">Welcome to OpenAPI Editor</h2>
+                            <p class="lead mb-4">Create and edit OpenAPI 3.1.1 specifications with ease.</p>
+                            <div class="row justify-content-center">
+                                <div class="col-md-8">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">✓ Add endpoints and configure their parameters</li>
+                                        <li class="mb-2">✓ Define request bodies and response schemas</li>
+                                        <li class="mb-2">✓ Import existing OpenAPI JSON files</li>
+                                        <li class="mb-2">✓ Export your specification as valid OpenAPI JSON</li>
+                                    </ul>
+                                    <p class="text-muted">Select an endpoint from the sidebar to start editing, or add a new one.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- End main-content -->
+                    <div id="validation-panel" class="validation-panel border-top p-3">
+                        <h4 class="h6 fw-bold text-secondary mb-2">Validation Results</h4>
+                        <div id="validation-results"></div>
+                    </div>
+                    <!-- Schema Editor Modal -->
+                    <div id="schema-editor-modal" class="modal fade" tabindex="-1" style="display: none;">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 id="schema-editor-title" class="modal-title h5">Edit Schema</h3>
+                                    <button id="close-schema-editor" type="button" class="btn-close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="schema-name" class="form-label">Schema Name</label>
+                                        <input type="text" id="schema-name" class="form-control" placeholder="User">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="schema-description" class="form-label">Description</label>
+                                        <textarea id="schema-description" class="form-control" rows="3" placeholder="User object schema"></textarea>
+                                    </div>
+
+                                    <ul class="nav nav-tabs mb-3">
+                                        <li class="nav-item">
+                                            <button class="nav-link active" data-tab="schema-builder">Visual Builder</button>
+                                        </li>
+                                        <li class="nav-item">
+                                            <button class="nav-link" data-tab="schema-json">JSON Editor</button>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content">
+                                        <div id="schema-builder-tab" class="tab-pane active">
+                                            <div class="schema-builder">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label for="schema-type" class="form-label">Type</label>
+                                                        <select id="schema-type" class="form-select">
+                                                            <option value="object">Object</option>
+                                                            <option value="array">Array</option>
+                                                            <option value="string">String</option>
+                                                            <option value="integer">Integer</option>
+                                                            <option value="number">Number</option>
+                                                            <option value="boolean">Boolean</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6" id="array-items-group" style="display: none;">
+                                                        <label for="array-items-type" class="form-label">Array Items Type</label>
+                                                        <select id="array-items-type" class="form-select">
+                                                            <option value="string">String</option>
+                                                            <option value="integer">Integer</option>
+                                                            <option value="number">Number</option>
+                                                            <option value="boolean">Boolean</option>
+                                                            <option value="object">Object</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div id="object-properties" style="display: block;">
+                                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <h4 class="h6 fw-bold">Properties</h4>
+                                                        <button id="add-property-btn" class="btn btn-sm btn-outline-secondary">Add Property</button>
+                                                    </div>
+                                                    <div id="properties-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div id="schema-json-tab" class="tab-pane">
+                                            <div class="mb-3">
+                                                <label for="schema-json" class="form-label">JSON Schema</label>
+                                                <textarea id="schema-json" class="form-control" rows="15" placeholder='{"type": "object", "properties": {}}'></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="save-schema-btn" class="btn btn-primary">Save Schema</button>
+                                    <button id="cancel-schema-btn" class="btn btn-secondary">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- End schema-editor-modal -->
+                    <!-- Tag Manager Modal -->
+                    <div id="tag-manager-modal" class="modal fade" tabindex="-1" style="display: none;">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 id="tag-manager-title" class="modal-title h5">Manage Tags</h3>
+                                    <button id="close-tag-manager" type="button" class="btn-close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="tag-name" class="form-label">Tag Name</label>
+                                        <input type="text" id="tag-name" class="form-control" placeholder="e.g., users, authentication">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="tag-description" class="form-label">Description (optional)</label>
+                                        <textarea id="tag-description" class="form-control" rows="3" placeholder="Brief description of this tag"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="save-tag-btn" class="btn btn-primary">Add Tag</button>
+                                    <button id="cancel-tag-btn" class="btn btn-secondary">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- End tag-manager-modal -->
+
+                    <!-- Security Editor Modal -->
+                    <div id="security-editor-modal" class="modal fade" tabindex="-1" style="display: none;">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 id="security-editor-title" class="modal-title h5">Add Security Scheme</h3>
+                                    <button id="close-security-editor" type="button" class="btn-close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="security-name" class="form-label">Security Scheme Name</label>
+                                        <input type="text" id="security-name" class="form-control" placeholder="e.g., bearerAuth, apiKey">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="security-description" class="form-label">Description (optional)</label>
+                                        <textarea id="security-description" class="form-control" rows="2" placeholder="Brief description of this security scheme"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="security-type" class="form-label">Security Type</label>
+                                        <select id="security-type" class="form-select">
+                                            <option value="apiKey">API Key</option>
+                                            <option value="http">HTTP</option>
+                                            <option value="oauth2">OAuth 2.0</option>
+                                            <option value="openIdConnect">OpenID Connect</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- API Key Configuration -->
+                                    <div id="api-key-config" class="security-config">
+                                        <h5 class="h6 fw-bold mb-3">API Key Configuration</h5>
+                                        <div class="mb-3">
+                                            <label for="api-key-name" class="form-label">Parameter Name</label>
+                                            <input type="text" id="api-key-name" class="form-control" placeholder="e.g., X-API-Key, api_key">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="api-key-in" class="form-label">Parameter Location</label>
+                                            <select id="api-key-in" class="form-select">
+                                                <option value="header">Header</option>
+                                                <option value="query">Query Parameter</option>
+                                                <option value="cookie">Cookie</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- HTTP Configuration -->
+                                    <div id="http-config" class="security-config" style="display: none;">
+                                        <h5 class="h6 fw-bold mb-3">HTTP Authentication Configuration</h5>
+                                        <div class="mb-3">
+                                            <label for="http-scheme" class="form-label">HTTP Scheme</label>
+                                            <select id="http-scheme" class="form-select">
+                                                <option value="basic">Basic</option>
+                                                <option value="bearer">Bearer</option>
+                                                <option value="digest">Digest</option>
+                                                <option value="hoba">HOBA</option>
+                                            </select>
+                                        </div>
+                                        <div id="http-bearer-format-container" class="mb-3" style="display: none;">
+                                            <label for="http-bearer-format" class="form-label">Bearer Format (optional)</label>
+                                            <input type="text" id="http-bearer-format" class="form-control" placeholder="e.g., JWT">
+                                            <small class="form-text text-muted">A hint about the format of the bearer token</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- OAuth 2.0 Configuration -->
+                                    <div id="oauth2-config" class="security-config" style="display: none;">
+                                        <h5 class="h6 fw-bold mb-3">OAuth 2.0 Configuration</h5>
+
+                                        <!-- Implicit Flow -->
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="oauth2-implicit-enabled" class="form-check-input">
+                                                <label class="form-check-label fw-semibold" for="oauth2-implicit-enabled">Implicit Flow</label>
+                                            </div>
+                                            <div id="oauth2-implicit-config" class="oauth2-flow-config ms-4 mt-2" style="display: none;">
+                                                <div class="mb-2">
+                                                    <label for="oauth2-implicit-auth-url" class="form-label">Authorization URL</label>
+                                                    <input type="url" id="oauth2-implicit-auth-url" class="form-control" placeholder="https://example.com/oauth/authorize">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label for="oauth2-implicit-refresh-url" class="form-label">Refresh URL (optional)</label>
+                                                    <input type="url" id="oauth2-implicit-refresh-url" class="form-control" placeholder="https://example.com/oauth/refresh">
+                                                </div>
+                                                <div id="oauth2-implicit-scopes" class="mb-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label class="form-label">Scopes</label>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary add-scope-btn" data-flow="implicit">Add Scope</button>
+                                                    </div>
+                                                    <div class="scopes-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Authorization Code Flow -->
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="oauth2-authcode-enabled" class="form-check-input">
+                                                <label class="form-check-label fw-semibold" for="oauth2-authcode-enabled">Authorization Code Flow</label>
+                                            </div>
+                                            <div id="oauth2-authcode-config" class="oauth2-flow-config ms-4 mt-2" style="display: none;">
+                                                <div class="mb-2">
+                                                    <label for="oauth2-authcode-auth-url" class="form-label">Authorization URL</label>
+                                                    <input type="url" id="oauth2-authcode-auth-url" class="form-control" placeholder="https://example.com/oauth/authorize">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label for="oauth2-authcode-token-url" class="form-label">Token URL</label>
+                                                    <input type="url" id="oauth2-authcode-token-url" class="form-control" placeholder="https://example.com/oauth/token">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label for="oauth2-authcode-refresh-url" class="form-label">Refresh URL (optional)</label>
+                                                    <input type="url" id="oauth2-authcode-refresh-url" class="form-control" placeholder="https://example.com/oauth/refresh">
+                                                </div>
+                                                <div id="oauth2-authcode-scopes" class="mb-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label class="form-label">Scopes</label>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary add-scope-btn" data-flow="authcode">Add Scope</button>
+                                                    </div>
+                                                    <div class="scopes-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Client Credentials Flow -->
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="oauth2-client-enabled" class="form-check-input">
+                                                <label class="form-check-label fw-semibold" for="oauth2-client-enabled">Client Credentials Flow</label>
+                                            </div>
+                                            <div id="oauth2-client-config" class="oauth2-flow-config ms-4 mt-2" style="display: none;">
+                                                <div class="mb-2">
+                                                    <label for="oauth2-client-token-url" class="form-label">Token URL</label>
+                                                    <input type="url" id="oauth2-client-token-url" class="form-control" placeholder="https://example.com/oauth/token">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label for="oauth2-client-refresh-url" class="form-label">Refresh URL (optional)</label>
+                                                    <input type="url" id="oauth2-client-refresh-url" class="form-control" placeholder="https://example.com/oauth/refresh">
+                                                </div>
+                                                <div id="oauth2-client-scopes" class="mb-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label class="form-label">Scopes</label>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary add-scope-btn" data-flow="client">Add Scope</button>
+                                                    </div>
+                                                    <div class="scopes-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Password Flow -->
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input type="checkbox" id="oauth2-password-enabled" class="form-check-input">
+                                                <label class="form-check-label fw-semibold" for="oauth2-password-enabled">Password Flow</label>
+                                            </div>
+                                            <div id="oauth2-password-config" class="oauth2-flow-config ms-4 mt-2" style="display: none;">
+                                                <div class="mb-2">
+                                                    <label for="oauth2-password-token-url" class="form-label">Token URL</label>
+                                                    <input type="url" id="oauth2-password-token-url" class="form-control" placeholder="https://example.com/oauth/token">
+                                                </div>
+                                                <div class="mb-2">
+                                                    <label for="oauth2-password-refresh-url" class="form-label">Refresh URL (optional)</label>
+                                                    <input type="url" id="oauth2-password-refresh-url" class="form-control" placeholder="https://example.com/oauth/refresh">
+                                                </div>
+                                                <div id="oauth2-password-scopes" class="mb-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <label class="form-label">Scopes</label>
+                                                        <button type="button" class="btn btn-sm btn-outline-secondary add-scope-btn" data-flow="password">Add Scope</button>
+                                                    </div>
+                                                    <div class="scopes-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- OpenID Connect Configuration -->
+                                    <div id="openid-config" class="security-config" style="display: none;">
+                                        <h5 class="h6 fw-bold mb-3">OpenID Connect Configuration</h5>
+                                        <div class="mb-3">
+                                            <label for="openid-url" class="form-label">OpenID Connect URL</label>
+                                            <input type="url" id="openid-url" class="form-control" placeholder="https://example.com/.well-known/openid_configuration">
+                                            <small class="form-text text-muted">URL to discover OpenID Connect provider configuration</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button id="save-security-btn" class="btn btn-primary">Save Security Scheme</button>
+                                    <button id="cancel-security-btn" class="btn btn-secondary">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- End security-editor-modal -->
+
+                </div> <!-- End col-lg-8 col-xl-9 -->
+            </div> <!-- End row -->
+        </div> <!-- End container-fluid -->
+        <input type="file" id="file-input" accept=".json" style="display: none;">
+        <!-- Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script type="module" src="src/main.js"></script>
+    </div> <!-- End #app -->
+</body>
+
+</html>
