@@ -1,4 +1,6 @@
 // Schema Manager for OpenAPI Editor
+import { sortObjectKeys } from './utils.js';
+
 export class SchemaManager {
     constructor(editor) {
         this.editor = editor;
@@ -520,12 +522,12 @@ export class SchemaManager {
         if (this.currentSchema.type === 'array' && this.currentSchema.items) {
             document.getElementById('array-items-type').value = this.currentSchema.items.type || 'string';
         }
-    }
-
-    updateJSONEditor() {
+    } updateJSONEditor() {
         const jsonEditor = document.getElementById('schema-json');
         if (this.currentSchema) {
-            jsonEditor.value = JSON.stringify(this.currentSchema, null, 2);
+            // Sort the schema keys for consistent display
+            const sortedSchema = sortObjectKeys(this.currentSchema);
+            jsonEditor.value = JSON.stringify(sortedSchema, null, 2);
         }
     }
 
@@ -619,7 +621,9 @@ export class SchemaManager {
                     schemaData.description = description;
                 }                // Populate the target textarea with the inline schema
                 if (this.contextTarget) {
-                    this.contextTarget.value = JSON.stringify(schemaData, null, 2);
+                    // Sort the schema keys for consistent display
+                    const sortedSchema = sortObjectKeys(schemaData);
+                    this.contextTarget.value = JSON.stringify(sortedSchema, null, 2);
 
                     // If this is a request body, make sure we're in custom schema mode
                     if (this.editContext === 'request-body') {
@@ -646,14 +650,15 @@ export class SchemaManager {
         const container = document.getElementById('schemas-list');
         const schemas = this.editor.getAllSchemas();
 
-        container.innerHTML = '';
-
-        if (Object.keys(schemas).length === 0) {
+        container.innerHTML = ''; if (Object.keys(schemas).length === 0) {
             container.innerHTML = '<p class="empty-state">No schemas defined. Schemas help structure your API data models.</p>';
             return;
         }
 
-        Object.entries(schemas).forEach(([name, schema]) => {
+        // Sort schemas alphabetically by name
+        const sortedSchemas = Object.entries(schemas).sort(([nameA], [nameB]) => nameA.localeCompare(nameB));
+
+        sortedSchemas.forEach(([name, schema]) => {
             const div = document.createElement('div');
             div.className = 'schema-item';
             div.dataset.schemaName = name;
@@ -691,13 +696,14 @@ export class SchemaManager {
             this.editor.deleteSchema(schemaName);
             this.renderSchemas();
         }
-    }
-
-    getSchemaSelectOptions() {
+    } getSchemaSelectOptions() {
         const schemas = this.editor.getAllSchemas();
         const options = ['<option value="">Select Schema</option>'];
 
-        Object.keys(schemas).forEach(name => {
+        // Sort schema names alphabetically
+        const sortedSchemaNames = Object.keys(schemas).sort((a, b) => a.localeCompare(b));
+
+        sortedSchemaNames.forEach(name => {
             options.push(`<option value="#/components/schemas/${name}">${name}</option>`);
         });
 

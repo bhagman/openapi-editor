@@ -1,4 +1,6 @@
 // OpenAPI Editor Core Logic
+import { sortOpenAPISpec } from './utils.js';
+
 export class OpenAPIEditor {
     constructor() {
         this.spec = null;
@@ -43,11 +45,10 @@ export class OpenAPIEditor {
 
         this.spec = { ...json };
         this.loadEndpointsFromSpec();
-    }
-
-    export() {
+    } export() {
         this.updateSpecFromEndpoints();
-        return { ...this.spec };
+        // Return a sorted copy of the spec for consistent JSON output
+        return sortOpenAPISpec({ ...this.spec });
     }
 
     updateAPIInfo(field, value) {

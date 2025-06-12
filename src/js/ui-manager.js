@@ -29,9 +29,7 @@ export class UIManager {
         document.getElementById('api-version').value = info.version || '';
         document.getElementById('api-description').value = info.description || '';
         document.getElementById('api-base-url').value = info.baseUrl || '';
-    }
-
-    renderEndpoints() {
+    } renderEndpoints() {
         const container = document.getElementById('endpoints-list');
         const endpointsByTag = this.editor.getEndpointsByTag();
 
@@ -42,9 +40,23 @@ export class UIManager {
             return;
         }
 
+        // Convert Map to array and sort tag groups alphabetically (untagged goes last)
+        const sortedTags = Array.from(endpointsByTag.entries()).sort(([tagA], [tagB]) => {
+            // Put untagged endpoints at the end
+            if (tagA === '__untagged__') return 1;
+            if (tagB === '__untagged__') return -1;
+            return tagA.localeCompare(tagB);
+        });
+
         // Render endpoints grouped by tags
-        endpointsByTag.forEach((endpoints, tagName) => {
+        sortedTags.forEach(([tagName, endpoints]) => {
             if (endpoints.length === 0) return;
+
+            // Sort endpoints within each group by path then method
+            const sortedEndpoints = [...endpoints].sort((a, b) => {
+                const pathCompare = a.path.localeCompare(b.path);
+                return pathCompare !== 0 ? pathCompare : a.method.localeCompare(b.method);
+            });
 
             const groupDiv = document.createElement('div');
             groupDiv.className = 'endpoint-group';
@@ -60,12 +72,12 @@ export class UIManager {
                         ${tagInfo?.description ? `<div class="group-description">${tagInfo.description}</div>` : ''}
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span class="endpoint-count">${endpoints.length}</span>
+                        <span class="endpoint-count">${sortedEndpoints.length}</span>
                         <span class="group-toggle">▼</span>
                     </div>
                 </div>
                 <div class="endpoint-group-content" id="group-${tagName}">
-                    ${this.renderEndpointsInGroup(endpoints)}
+                    ${this.renderEndpointsInGroup(sortedEndpoints)}
                 </div>
             `;
 
@@ -555,13 +567,14 @@ export class UIManager {
                 </div>
             </div>
         `).join('');
-    }
-
-    getSchemaSelectOptions() {
+    } getSchemaSelectOptions() {
         const schemas = this.editor.getAllSchemas();
         const options = [];
 
-        Object.keys(schemas).forEach(name => {
+        // Sort schema names alphabetically
+        const sortedSchemaNames = Object.keys(schemas).sort((a, b) => a.localeCompare(b));
+
+        sortedSchemaNames.forEach(name => {
             options.push(`<option value="#/components/schemas/${name}">${name}</option>`);
         });
 
@@ -782,15 +795,16 @@ export class UIManager {
             });
             panel.classList.add('show');
         }
-    }
-
-    updateTagSelectOptions() {
+    } updateTagSelectOptions() {
         const select = document.getElementById('endpoint-tags-select');
         const tags = this.editor.getAllTags();
 
         select.innerHTML = '';
 
-        tags.forEach(tag => {
+        // Sort tags alphabetically by name
+        const sortedTags = [...tags].sort((a, b) => a.name.localeCompare(b.name));
+
+        sortedTags.forEach(tag => {
             const option = document.createElement('option');
             option.value = tag.name;
             option.textContent = tag.name + (tag.description ? ` - ${tag.description}` : '');
@@ -892,9 +906,7 @@ export class UIManager {
                 window.schemaManager.showSchemaEditor(null, 'request-body', schemaTextarea);
             }
         }
-    }
-
-    refreshSecurityOptions() {
+    } refreshSecurityOptions() {
         // Refresh security options in endpoint security requirements
         if (window.securityManager) {
             // Re-render any open security requirements dropdowns
@@ -904,7 +916,11 @@ export class UIManager {
                 const securitySchemes = this.editor.getAllSecuritySchemes();
 
                 select.innerHTML = '<option value="">Select security scheme</option>';
-                Object.keys(securitySchemes).forEach(name => {
+
+                // Sort security scheme names alphabetically
+                const sortedSchemeNames = Object.keys(securitySchemes).sort((a, b) => a.localeCompare(b));
+
+                sortedSchemeNames.forEach(name => {
                     const option = document.createElement('option');
                     option.value = name;
                     option.textContent = name;

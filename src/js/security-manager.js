@@ -498,7 +498,12 @@ export class SecurityManager {
         container.innerHTML = ''; if (Object.keys(securitySchemes).length === 0) {
             container.innerHTML = '<p class="empty-state text-muted small">No security schemes created yet.</p>';
             return;
-        } Object.entries(securitySchemes).forEach(([name, scheme]) => {
+        }
+
+        // Sort security schemes alphabetically by name
+        const sortedSecuritySchemes = Object.entries(securitySchemes).sort(([nameA], [nameB]) => nameA.localeCompare(nameB));
+
+        sortedSecuritySchemes.forEach(([name, scheme]) => {
             const div = document.createElement('div');
             div.className = 'security-item p-2 border rounded mb-2 d-flex justify-content-between align-items-center';
 
@@ -577,10 +582,10 @@ export class SecurityManager {
         }
 
         const div = document.createElement('div');
-        div.className = 'security-requirement-item border rounded p-3 mb-2';
-
-        let schemesOptions = '';
-        Object.keys(securitySchemes).forEach(name => {
+        div.className = 'security-requirement-item border rounded p-3 mb-2'; let schemesOptions = '';
+        // Sort security scheme names alphabetically
+        const sortedSchemeNames = Object.keys(securitySchemes).sort((a, b) => a.localeCompare(b));
+        sortedSchemeNames.forEach(name => {
             schemesOptions += `<option value="${name}">${name}</option>`;
         });
 
@@ -692,13 +697,14 @@ export class SecurityManager {
                 }
             });
         });
-    }
-
-    getSecuritySelectOptions() {
+    } getSecuritySelectOptions() {
         const securitySchemes = this.editor.getAllSecuritySchemes();
         const options = ['<option value="">No security</option>'];
 
-        Object.keys(securitySchemes).forEach(name => {
+        // Sort security scheme names alphabetically
+        const sortedSchemeNames = Object.keys(securitySchemes).sort((a, b) => a.localeCompare(b));
+
+        sortedSchemeNames.forEach(name => {
             options.push(`<option value="${name}">${name}</option>`);
         });
 

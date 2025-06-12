@@ -150,12 +150,15 @@ export class TagManager {
         const tags = this.editor.getAllTags();
         const endpointsByTag = this.editor.getEndpointsByTag();
 
-        container.innerHTML = '';
-
-        if (tags.length === 0) {
+        container.innerHTML = ''; if (tags.length === 0) {
             container.innerHTML = '<p class="empty-state">No tags defined. Tags help organize your endpoints.</p>';
             return;
-        } tags.forEach(tag => {
+        }
+
+        // Sort tags alphabetically by name
+        const sortedTags = [...tags].sort((a, b) => a.name.localeCompare(b.name));
+
+        sortedTags.forEach(tag => {
             const div = document.createElement('div');
             div.className = 'tag-item';
 
